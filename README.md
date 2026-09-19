@@ -1,3 +1,5 @@
+Write your own MCP Tool in python.
+
 # MCP Server Template (Python)
 
 A minimal, opinionated starter template for building [Model Context Protocol](https://modelcontextprotocol.io/) servers in Python using the official `mcp` SDK (**v2**, where `FastMCP` is now `MCPServer`).
@@ -89,10 +91,48 @@ If your tools need secrets, read them from the environment (e.g. `os.environ`)
 and provide them via your client's `env` block or a local `.env` file you load
 yourself. Never commit real secrets.
 
-## Transports
+## Server lifecycle & automation
 
-The default transport is **stdio** (local clients). For HTTP, call:
+### stdio (default): the client manages the server
 
-```python
-create_server().run(transport="streamable-http")
+With the **stdio** transport you never start the server manually. The client
+(VS Code, Claude Desktop, ...) spawns the process itself using the config
+above, talks to it over stdin/stdout, and **kills it when the session ends**.
+Each client session gets its own process — that is normal and intended.
+
+### HTTP transports: a long-running process
+
+`streamable-http` (and `sse`) run a persistent HTTP server. Start it once and
+connect any remote client to the endpoint:
+
+```bash
+uv run mcp-server-template --transport streamable-http --host 127.0.0.1 --port 8000
+# endpoint: http://127.0.0.1:8000/mcp
 ```
+
+CLI options: `--transport {stdio,sse,streamable-http}`, `--host`, `--port`.
+
+#### Automation options
+
+| Context | How |
+|---|---|
+| **VS Code** | `.vscode/tasks.json` ships two tasks: `MCP: Start Server (stdio)` and `MCP: Start Server (streamable-http)`. The HTTP task has `runOnFolderOpen: true`, so it starts automatically when you open the folder. Run it manually via *Terminal → Run Task*. |
+| **Windows (logon)** | `scripts/setup-windows-task.ps1` registers a **Task Scheduler** task that starts the HTTP server at user logon, with automatic restart (3×) on failure. See below. |
+| **Windows (service)** | For a service that survives logout, wrap it with [NSSM](https://nssm.cc/): `nssm install mcp-server-template <path-to-uv> run mcp-server-template --transport streamable-http` |
+| **Docker / Linux** | Standard container or `systemd` unit running the same command. |
+
+#### Windows Task Scheduler (one-liner)
+
+```powershell
+# Create (idempotent — re-running updates the task):
+pwsh scripts/setup-windows-task.ps1
+
+# Custom port:
+pwsh scripts/setup-windows-task.ps1 -Port 9000
+
+# Remove:
+pwsh scripts/setup-windows-task.ps1 -Remove
+```
+
+The script resolves `uv` from PATH and pins the working directory to the
+project root, so the task keeps working after the folder is moved.

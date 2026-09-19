@@ -2,7 +2,7 @@
 
 import asyncio
 
-from mcp_server_template.server import create_server
+from mcp_server_template.server import create_server, parse_args
 
 
 def test_create_server_registers_capabilities():
@@ -22,3 +22,19 @@ def test_add_tool_returns_sum():
     result = asyncio.run(server.call_tool("add", {"a": 2, "b": 3}))
     # call_tool returns a CallToolResult; the structured payload holds the value.
     assert result.structured_content["result"] == 5
+
+
+def test_parse_args_defaults_to_stdio():
+    args = parse_args([])
+    assert args.transport == "stdio"
+    assert args.host == "127.0.0.1"
+    assert args.port == 8000
+
+
+def test_parse_args_http_transport():
+    args = parse_args(
+        ["--transport", "streamable-http", "--host", "0.0.0.0", "--port", "9000"]
+    )
+    assert args.transport == "streamable-http"
+    assert args.host == "0.0.0.0"
+    assert args.port == 9000

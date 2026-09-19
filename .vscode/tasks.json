@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MCP: Start Server (stdio)",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "mcp-server-template"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "mcp-server"
+      },
+      "detail": "Run the MCP server over stdio. For local clients (VS Code MCP config, Claude Desktop) the client spawns this process itself, so this task is mainly useful for manual testing."
+    },
+    {
+      "label": "MCP: Start Server (streamable-http)",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "mcp-server-template", "--transport", "streamable-http", "--host", "127.0.0.1", "--port", "8000"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "runOptions": {
+        "runOnFolderOpen": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "mcp-server"
+      },
+      "detail": "Long-running HTTP MCP server on http://127.0.0.1:8000/mcp. Starts automatically when the folder is opened; connect a remote client to that URL."
+    }
+  ]
+}
