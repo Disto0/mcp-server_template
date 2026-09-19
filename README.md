@@ -73,7 +73,8 @@ project directory:
 }
 ```
 
-(Continue)
+## (Continue)
+
 ```yaml
 mcpServers:
   - name: mcp-template
