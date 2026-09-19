@@ -71,6 +71,18 @@ project directory:
 }
 ```
 
+(Continue)
+```yaml
+mcpServers:
+  - name: mcp-template
+    command: uv
+    args:
+      - --directory
+      - "ABSOLUTE\\PATH\\TO\\mcp-server_template"
+      - run
+      - mcp-server-template
+```
+
 ## Environment variables
 
 If your tools need secrets, read them from the environment (e.g. `os.environ`)
